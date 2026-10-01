@@ -1,0 +1,269 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1c22;
+}
+
+body {
+  font-family: 'Google Sans Flex', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #fff;
+}
+
+/* Everything is set in regular 400, including emphasis. */
+em {
+  font-style: normal;
+}
+
+canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  touch-action: none; /* finger drags draw instead of scrolling */
+  cursor: none;
+}
+
+/* Sits above the glass but lets clicks through, so drawing works underneath. */
+footer {
+  position: fixed;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px 40px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.intro {
+  margin: 0;
+  max-width: 380px;
+  text-wrap: balance;
+}
+
+nav {
+  display: flex;
+  margin-left: auto; /* stays bottom right even without the intro */
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+nav a {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: none;
+}
+
+nav a::before { content: '['; }
+nav a::after { content: ']'; }
+
+nav [aria-disabled] {
+  opacity: 0.5;
+}
+
+/* Centered prompt: fades in shortly after the page is up (main.js adds
+   .shown), and blurs away the first time the glass is touched. */
+#hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  margin: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+}
+
+#hint.shown {
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+
+#hint.gone {
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+/* Rain intensity: a frosted vertical bar with a round handle, no labels.
+   It's a horizontal slider rotated to point up, so up means more rain. The
+   rotation pivots on the box's left-middle, which places the bar's center
+   29px from the left (so the handle's edge sits 24px in) and its bottom 24px
+   up. The frosted bar is drawn behind the slider, since a slider's own track
+   can't blur what's behind it. */
+#rain-control {
+  position: fixed;
+  left: 29px;
+  bottom: 12px;
+  width: 120px;
+  height: 24px; /* wider than it looks once rotated, so it's easy to grab */
+  transform: rotate(-90deg);
+  transform-origin: 0 50%;
+}
+
+/* A sharp-edged frosted glass bar: it blurs what's behind it under a
+   translucent white tint. */
+#rain-control::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 9px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+#rain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: grab;
+}
+
+/* Over the slider, the system's open hand stands in for the white dot. */
+html:has(#rain:hover) #cursor {
+  display: none;
+}
+
+#rain:focus {
+  outline: none;
+}
+
+#rain:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 4px;
+}
+
+/* The slider's own track is invisible; the stripe above stands in for it. */
+#rain::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#rain::-moz-range-track {
+  height: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#rain::-moz-range-progress {
+  background: transparent;
+}
+
+#rain::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -2px; /* centers the handle on the 6px track */
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease-out;
+}
+
+#rain::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease-out;
+}
+
+#rain:hover::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+#rain:hover::-moz-range-thumb {
+  transform: scale(1.3);
+}
+
+/* Loading screen, matching Red Baron's: a black screen with a thin bar that
+   eases toward 90% while waiting, fills once the background is ready, then
+   fades out. */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  transition: opacity 500ms ease-in-out;
+}
+
+#loader.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-bar {
+  position: relative;
+  box-sizing: border-box;
+  width: 224px;
+  height: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.loader-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  border-radius: 9999px;
+  background: #fff;
+  transition: width 80ms linear;
+}
+
+#cursor {
+  position: fixed;
+  z-index: 300; /* above the loading screen */
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+}
+
+#cursor[hidden] {
+  display: none;
+}
+
+html.grabbing,
+html.grabbing * {
+  cursor: grabbing !important;
+}
+
+html.grabbing #cursor {
+  display: none;
+}
